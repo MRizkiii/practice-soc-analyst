@@ -39,6 +39,11 @@ for line in berhasil:
     x = line.split()
     dataBerhasilLog.append(data(x[0], x[1], x[2], x[8], x[10], x[12]))
 
+# print(dataBerhasilLog)
+# for x in dataBerhasilLog:
+#     x = x["user"]
+#     print(x)
+
 #USER LOGIN
 userLogin = []
 userLoginTotal = {}
@@ -49,13 +54,17 @@ for x in userLogin:
     userLoginTotal[x] = userLoginTotal.get(x, 0) + 1
 
 
-
-
 #GAGAL DATA
 dataGagalLog = []
 for x in gagal:
     x = x.split()
-    dataGagalLog.append(data(x[0], x[1], x[2], x[8], x[10], x[10]))
+    if x[8] != 'times:':
+        dataGagalLog.append(data(x[0], x[1], x[2], x[8], x[10], x[12]))
+
+
+# for x in dataGagalLog:
+#      x = x['user']
+#      print(x)
 
 #USER GAGAL
 userGagal = []
@@ -105,8 +114,11 @@ for x in userInvalid:
     userInvalidTotal[x] = userInvalidTotal.get(x, 0) + 1
 
 print(userLoginTotal)
+print("////////////////////////////////////////")
 print(userGagalTotal)
+print("////////////////////////////////////////")
 print(userInvalidTotal)
+
 
 
 

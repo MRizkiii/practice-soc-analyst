@@ -1,10 +1,12 @@
+###FILTERING
+
+
 def log(file):
     return [x for x in file if "sshd" in x]
-
-
 def is_valid_login_line(line):
     return "for " in line and "from " in line and "port " in line
 
+##PARSING
 
 def parsing(x):
     x = x.replace("  ", " ")
@@ -104,7 +106,7 @@ def printHasil(IP, USER, JAM):
         print(f" JAM {x} di serang {y}x")
 
  
-
+##LOGIC
 with open("auth.log", "r") as f:
     logs = f.readlines()
     sshLog = log(logs)

@@ -2,7 +2,9 @@
 
 
 def log(file):
-    return [x for x in file if "sshd" in x]
+    return "sshd" in file
+    # return [x for x in file if "sshd" in x]
+    
 def is_valid_login_line(line):
     return "for " in line and "from " in line and "port " in line
 
@@ -24,9 +26,10 @@ def parsing(x):
         Auser = x.find("invalid user ") + 13
         Buser = x.find(" ", Auser)
 
-    bulan = x.split()[0]
-    tanggal = x.split()[1]
-    jam = x.split()[2]
+    parts = x.split()
+    bulan = parts[0]
+    tanggal = parts[1]
+    jam = parts[2]
 
     status = "unknown"
     if "Accepted" in x:
@@ -62,26 +65,6 @@ def parsing(x):
     }
 
 
-def FailedLoginIPCount(x, coontainer):
-    ip = x["ip"]
-    coontainer[ip] = coontainer.get(ip, 0) + 1
-    return coontainer
-
-
-def InvalidUserCount(x, container):
-    usr = x["user"]
-    container[usr] = container.get(usr, 0) + 1
-    return container
-
-
-def TimeAttack(x, container):
-    x = x["jam"]
-    x = x.split(":")
-    jam = x[0]
-    container[jam] = container.get(jam, 0) + 1
-    return container
-
-
 def ipLolos(x, container):
     container.append(x["ip"])
     container
@@ -107,17 +90,36 @@ def printHasil(IP, USER, JAM):
 
  
 ##LOGIC
-with open("auth.log", "r") as f:
-    logs = f.readlines()
-    sshLog = log(logs)
-
 fullData = []
-for line in sshLog:
-    if not is_valid_login_line(line):
-        continue
+with open("auth.log", "r") as f:
+    for x in f:
+        if log(x) and is_valid_login_line(x):
+            data = parsing(x)
+            fullData.append(data)
 
-    data = parsing(line)
-    fullData.append(data)
+
+def FailedLoginIPCount(x):
+    tes = {}
+    for i in x:
+        ip = i["ip"]
+        tes[ip] = tes.get(ip, 0) + 1
+    return tes
+
+def tes (x):
+    tes = {}
+    for i in x:
+        usr = i["user"]
+        tes[usr] = tes.get(usr, 0) + 1
+    return tes
+
+def TimeAttack(xx):
+    tes = {}
+    for x in xx:
+        x = x["jam"]
+        x = x.split(":")
+        jam = x[0]
+        tes[jam] = tes.get(jam, 0) + 1
+    return tes
 
 
 acceptedLog = []
@@ -132,19 +134,10 @@ for x in fullData:
     if x["status"] == "Invalid User":
         invalidUserLog.append(x)
 
-# print(failedLog)
+counterIP = FailedLoginIPCount(failedLog)
+invalidUser = tes(invalidUserLog)
+jamRawan = TimeAttack(failedLog)
 
-counterIP = {}
-for x in failedLog:
-    hasil = FailedLoginIPCount(x, counterIP)
-
-invalidUser = {}
-for x in invalidUserLog:
-    hasil = InvalidUserCount(x, invalidUser)
-
-jamRawan = {}
-for x in failedLog:
-    TimeAttack(x, jamRawan)
 
 ipAcc = []
 for x in acceptedLog:

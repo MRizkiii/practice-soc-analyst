@@ -1,15 +1,11 @@
 ###FILTERING
-
-
 def log(file):
     return "sshd" in file
-    # return [x for x in file if "sshd" in x]
     
 def is_valid_login_line(line):
     return "for " in line and "from " in line and "port " in line
 
 ##PARSING
-
 def parsing(x):
     x = x.replace("  ", " ")
 
@@ -138,12 +134,10 @@ counterIP = FailedLoginIPCount(failedLog)
 invalidUser = tes(invalidUserLog)
 jamRawan = TimeAttack(failedLog)
 
-
 ipAcc = []
 for x in acceptedLog:
     ipLolos(x, ipAcc)
 ipAcc = set(ipAcc)
-
 
 for x, y in counterIP.items():
     if x in ipAcc:

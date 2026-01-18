@@ -52,6 +52,7 @@ def parsing(x):
         "bulan": bulan,
         "tanggal": tanggal,
         "jam": jam,
+        "fulltime" : f"{jam} {tanggal} {bulan} 2025",
         "user": user,
         "ip": x[Aip:Bip],
         "port": x[Aport:Bport],

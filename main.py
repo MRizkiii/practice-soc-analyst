@@ -1,16 +1,6 @@
 from parsing import log, is_valid_login_line, parsing
 from analysis import count_stats, urutan   
 
-def ipLolos(x, container):
-    container.append(x["ip"])
-    container
-    # container[ip] = container.get(ip, 0) + 1
-    return container
-
-def urutan(isi):
-    urut = sorted(isi.items(), key=lambda item: item[1], reverse=True) 
-    return urut
-
 def printHasil(IP, USER, JAM):
     print("=== TOP ATTACKER IPs ===")
     for ip, count in IP[:10]:
@@ -25,7 +15,6 @@ def printHasil(IP, USER, JAM):
         print(f" JAM {x} di serang {y}x")
 
  
-##LOGIC
 def main():
     fullData = []
     with open("auth.log", "r") as f:
@@ -33,7 +22,6 @@ def main():
             if log(x) and is_valid_login_line(x):
                 data = parsing(x)
                 fullData.append(data)
-
 
     acceptedLog = []
     failedLog = []

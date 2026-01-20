@@ -25,25 +25,15 @@ def brute_force_detected(x, data):
 
     value = data.get(ip, [])
     value.append(jam_sekarang)
-    
-    newValue = []
+
+    realValue = []
     for jam_lama in value:
-        if jam_sekarang - jam_lama <= 60:
-            newValue.append(jam_lama)
+        if jam_sekarang - jam_lama <= 60 :
+            realValue.append(jam_lama)
 
-    data[ip] = newValue
-    if len(newValue) > 3:
-        return True
-    return False
+    data[ip] = realValue
 
-
-
-
-
-    # value.append(jam)
-
-    
-
-    
-
-    
+    if len(realValue) >= 3:
+        return True, len(realValue)
+    return False, 0
+      

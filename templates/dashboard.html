@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SOC Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <h1>SOC Security Dashboard</h1>
+    <p>Auth Log Monitoring & Brute Force Detection</p>
+</header>
+
+<main class="grid">
+
+    <!-- TOP IP -->
+    <section class="card">
+        <h2>Top Attacker IP</h2>
+        <table>
+            <tr>
+                <th>IP Address</th>
+                <th>Serangan</th>
+            </tr>
+            {% for ip, total in ipsort %}
+            <tr>
+                <td>{{ ip }}</td>
+                <td>{{ total }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </section>
+
+    <!-- TOP USER -->
+    <section class="card">
+        <h2>Top Attacked User</h2>
+        <table>
+            <tr>
+                <th>User</th>
+                <th>Serangan</th>
+            </tr>
+            {% for user, total in usersort %}
+            <tr>
+                <td>{{ user }}</td>
+                <td>{{ total }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </section>
+
+    <!-- JAM RAWAN -->
+    <section class="card">
+        <h2>Jam Paling Rawan</h2>
+        <table>
+            <tr>
+                <th>Jam</th>
+                <th>Serangan</th>
+            </tr>
+            {% for jam, total in jamsort %}
+            <tr>
+                <td>{{ jam }}</td>
+                <td>{{ total }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </section>
+
+    <!-- ALARM -->
+    <section class="card alarm-card">
+        <h2>Brute Force Alerts</h2>
+
+        {% if alarms %}
+            {% for alarm in alarms %}
+            <div class="alarm">
+                <strong>ALERT</strong><br>
+                IP <span>{{ alarm.ip }}</span><br>
+                {{ alarm.total }} percobaan login dalam 60 detik
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="safe">
+                Tidak ada brute force terdeteksi
+            </div>
+        {% endif %}
+    </section>
+
+</main>
+
+<footer>
+    SOC Dashboard • Flask • Python
+</footer>
+
+</body>
+</html>

@@ -36,4 +36,22 @@ def brute_force_detected(x, data):
     if len(realValue) >= 5:
         return True, len(realValue)
     return False, 0
-      
+
+
+def loginSuccess(x, container):
+    ip = x["ip"]
+    jam = x["jam"]
+
+    value = container.get(ip, [])
+    value.append(jam)
+    container[ip] =  value
+    
+def corelation(accept, fail, hasil):
+    for x in accept:
+        if x in fail:
+            hasil[x] = accept[x]
+
+
+# def analyze_threat_level(ip, data_failed, data_success):
+
+    

@@ -1,5 +1,5 @@
 from parsing import log, is_valid_login_line, parsing
-from analysis import count_stats, urutan, brute_force_detected
+from analysis import count_stats, urutan, brute_force_detected, loginSuccess, corelation
 
 def printHasil(IP, USER, JAM):
     print("=== TOP ATTACKER IPs ===")
@@ -38,6 +38,11 @@ def generate_report(fullData):
     sementara = {}
     blacklist = []
     alarms = []
+    acc = {}
+
+    for x in acceptedLog:
+        loginSuccess(x, acc)
+
 
     for x in failedLog:
         is_brute, total = brute_force_detected(x, sementara)
@@ -48,6 +53,12 @@ def generate_report(fullData):
             })
             blacklist.append(x["ip"])
 
+    sc = {}
+    corelation(acc, sementara, sc)
+    for x in sc:
+        totalBerhasil = len(sc[x])
+        print(f"IP: {x} | total Login : {totalBerhasil}, setelah melakukan bruteforce sebanyak ")
+
     return {
         "ipsort": ipsort,
         "usersort": usersort,
@@ -56,6 +67,7 @@ def generate_report(fullData):
         "sementara": sementara,
         "blacklist": blacklist
     }
+
 
 def main():
     fullData = []

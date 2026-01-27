@@ -14,6 +14,7 @@ def brute_force_detected(x, data):
     jam = x["jam"]
     ip = x["ip"]
     tgl = x["tanggal"]
+    user = x["user"]
 
     jam = jam.split(":")
     perhari = int(tgl) * 86400
@@ -24,12 +25,12 @@ def brute_force_detected(x, data):
     jam_sekarang = perhari + perjam + permenit + perdetik
 
     value = data.get(ip, [])
-    value.append(jam_sekarang)
+    value.append((jam_sekarang, user))
 
     realValue = []
-    for jam_lama in value:
-        if jam_sekarang - jam_lama <= 60 :
-            realValue.append(jam_lama)
+    for waktu_lama, user_lama in value: # Bongkar paketnya di sini
+        if jam_sekarang - waktu_lama <= 60:
+            realValue.append((waktu_lama, user_lama)) # Masukin lagi paketnya ke list baru
 
     data[ip] = realValue
 
@@ -41,9 +42,10 @@ def brute_force_detected(x, data):
 def loginSuccess(x, container):
     ip = x["ip"]
     jam = x["jam"]
+    user = x["user"]
 
     value = container.get(ip, [])
-    value.append(jam)
+    value.append((jam, user))
     container[ip] =  value
     
 def corelation(accept, fail, hasil):
@@ -53,5 +55,6 @@ def corelation(accept, fail, hasil):
 
 
 # def analyze_threat_level(ip, data_failed, data_success):
+
 
     

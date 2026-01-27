@@ -4,7 +4,7 @@ Tools sederhana berbasis Python untuk menganalisis file log SSH (`auth.log`) gun
 
 ### 1. Mode Web Dashboard (Tampilan Visual)
 
-Jalankan perintah berikut:
+Jalankan perintah berikut (Pastikan menginstall Flask di environment dulu sebelum menjalankan perintah):
 
 ```bash
 python app.py

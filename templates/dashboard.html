@@ -2,178 +2,239 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>SOC Dashboard</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SOC Security Dashboard - SSH Log Analysis and Brute Force Detection" />
+    <title>SOC Security Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   </head>
   <body>
     <header>
       <h1>SOC Security Dashboard</h1>
-      <p>Auth Log Monitoring & Brute Force Detection</p>
+      <p>Auth Log Monitoring &amp; Brute Force Detection</p>
     </header>
 
+    <!-- Summary Cards -->
+    {% if summary %}
+    <section class="summary-grid">
+      <div class="summary-card">
+        <span class="summary-value">{{ summary.total_entries }}</span>
+        <span class="summary-label">Total Entries</span>
+      </div>
+      <div class="summary-card success">
+        <span class="summary-value">{{ summary.successful_logins }}</span>
+        <span class="summary-label">Successful Logins</span>
+      </div>
+      <div class="summary-card warning">
+        <span class="summary-value">{{ summary.failed_attempts }}</span>
+        <span class="summary-label">Failed Attempts</span>
+      </div>
+      <div class="summary-card danger">
+        <span class="summary-value">{{ summary.brute_force_alerts }}</span>
+        <span class="summary-label">Brute Force Alerts</span>
+      </div>
+      <div class="summary-card info">
+        <span class="summary-value">{{ summary.unique_attacker_ips }}</span>
+        <span class="summary-label">Unique Attackers</span>
+      </div>
+      <div class="summary-card critical">
+        <span class="summary-value">{{ summary.potential_compromises }}</span>
+        <span class="summary-label">Potential Compromises</span>
+      </div>
+    </section>
+    {% endif %}
+
     <main class="grid">
-      <!-- TOP IP -->
-    <section class="card">
-        <h2>Top Attacker IP</h2>
-        <div class="card-content">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>IP Address</th>
-                        <th>Serangan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ip, total in ipsort %}
-                    <tr class="data-item">
-                        <td>{{ ip }}</td>
-                        <td>{{ total }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <button class="load-more">Load More</button>
-        </div>
-    </section>
-
-    <!-- TOP USER -->
-    <section class="card">
-        <h2>Top Attacked User</h2>
-        <div class="card-content">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Serangan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user, total in usersort %}
-                    <tr class="data-item">
-                        <td>{{ user }}</td>
-                        <td>{{ total }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <button class="load-more">Load More</button>
-        </div>
-    </section>
-
-    <!-- JAM RAWAN -->
-    <section class="card">
-        <h2>Jam Paling Rawan</h2>
-        <div class="card-content">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Jam</th>
-                        <th>Serangan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for jam, total in jamsort %}
-                    <tr class="data-item">
-                        <td>{{ jam }}</td>
-                        <td>{{ total }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <button class="load-more">Load More</button>
-        </div>
-    </section>
-
-    <!-- ALARM -->
-    <section class="card alarm-card">
+      <!-- BRUTE FORCE ALERTS -->
+      <section class="card alarm-card">
         <h2>Brute Force Alerts</h2>
         <div class="card-content">
-            {% if alarms %}
-                <div class="alarm-list">
-                    {% for alarm in alarms %}
-                    <div class="alarm data-item">
-                        <strong>ALERT</strong><br>
-                        IP <span>{{ alarm.ip }}</span><br>
-                        {{ alarm.total }} percobaan login dalam 60 detik
-                    </div>
-                    {% endfor %}
+          {% if alarms %}
+            <div class="alarm-list">
+              {% for alarm in alarms %}
+              <div class="alarm data-item {% if alarm.severity == 'critical' %}alarm-critical{% elif alarm.severity == 'high' %}alarm-high{% endif %}">
+                <div class="alarm-header">
+                  <strong>ALERT</strong>
+                  <span class="severity-badge {{ alarm.severity or 'high' }}">{{ alarm.severity|upper or 'HIGH' }}</span>
                 </div>
-                <button class="load-more">Load More</button>
-            {% else %}
-                <div class="safe">
-                    Tidak ada brute force terdeteksi
+                <div class="alarm-body">
+                  IP: <span class="highlight">{{ alarm.ip }}</span><br>
+                  {{ alarm.total }} login attempts dalam 60 detik
+                  {% if alarm.targeted_users %}
+                  <br><small>Target: {{ alarm.targeted_users[:3]|join(', ') }}</small>
+                  {% endif %}
                 </div>
-            {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+            <button class="load-more">Load More</button>
+          {% else %}
+            <div class="safe">
+              Tidak ada brute force terdeteksi
+            </div>
+          {% endif %}
         </div>
-    </section>
+      </section>
+
+      <!-- POTENTIAL COMPROMISES -->
+      {% if correlations %}
+      <section class="card compromise-card">
+        <h2>Potential Compromises</h2>
+        <p class="card-subtitle">IP yang berhasil login setelah banyak kegagalan</p>
+        <div class="card-content">
+          <div class="alarm-list">
+            {% for corr in correlations %}
+            <div class="alarm alarm-warning data-item">
+              <div class="alarm-header">
+                <strong>SUCCESS AFTER FAILURE</strong>
+                <span class="severity-badge {{ corr.severity }}">{{ corr.severity|upper }}</span>
+              </div>
+              <div class="alarm-body">
+                IP: <span class="highlight">{{ corr.ip }}</span><br>
+                Failed {{ corr.failed_attempts }}x, lalu berhasil {{ corr.successful_logins }}x
+                {% if corr.users %}
+                <br><small>Users: {{ corr.users[:3]|join(', ') }}</small>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <button class="load-more">Load More</button>
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- TOP ATTACKER IPs -->
+      <section class="card">
+        <h2>Top Attacker IPs</h2>
+        <div class="card-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>IP Address</th>
+                <th>Serangan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ip, total in ipsort %}
+              <tr class="data-item">
+                <td><code>{{ ip }}</code></td>
+                <td>{{ total }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <button class="load-more">Load More</button>
+        </div>
+      </section>
+
+      <!-- TOP ATTACKED USERS -->
+      <section class="card">
+        <h2>Top Attacked Users</h2>
+        <div class="card-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Serangan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user, total in usersort %}
+              <tr class="data-item">
+                <td><code>{{ user }}</code></td>
+                <td>{{ total }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <button class="load-more">Load More</button>
+        </div>
+      </section>
+
+      <!-- ATTACK HOURS -->
+      <section class="card">
+        <h2>Jam Paling Rawan</h2>
+        <div class="card-content">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Jam</th>
+                <th>Serangan</th>
+                <th>Activity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% set max_val = jamsort[0][1] if jamsort else 1 %}
+              {% for jam, total in jamsort %}
+              <tr class="data-item">
+                <td>{{ jam }}:00</td>
+                <td>{{ total }}</td>
+                <td>
+                  <div class="bar-container">
+                    <div class="bar" style="width: {{ (total / max_val * 100) | round(2) }}%"></div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <button class="load-more">Load More</button>
+        </div>
+      </section>
     </main>
 
-    <footer>SOC Dashboard • Flask • Python</footer>
-  
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Configuration
+    <footer>SOC Dashboard &bull; Flask &bull; Python</footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
         const INITIAL_VISIBLE = 5;
         const SHOW_MORE_STEP = 10;
 
-        // Process each card that has a load-more button
         const cards = document.querySelectorAll('.card');
 
         cards.forEach(card => {
-            const btn = card.querySelector('.load-more');
-            if (!btn) return;
+          const btn = card.querySelector('.load-more');
+          if (!btn) return;
 
-            const items = card.querySelectorAll('.data-item');
-            
-            // Function to update visibility based on current state
-            function init() {
-                if (items.length <= INITIAL_VISIBLE) {
-                    btn.style.display = 'none';
-                    return;
-                }
-
-                // Initial minimize: hide everything after INITIAL_VISIBLE
-                items.forEach((item, index) => {
-                    if (index >= INITIAL_VISIBLE) {
-                        item.classList.add('hidden');
-                    }
-                });
+          const items = card.querySelectorAll('.data-item');
+          
+          function init() {
+            if (items.length <= INITIAL_VISIBLE) {
+              btn.style.display = 'none';
+              return;
             }
 
-            // Click handler
-            btn.addEventListener('click', function() {
-                if (btn.textContent === "Show Less") {
-                    // Minimize
-                    items.forEach((item, index) => {
-                        if (index >= INITIAL_VISIBLE) {
-                            item.classList.add('hidden');
-                        }
-                    });
-                    btn.textContent = "Load More";
-                    // Optional: Scroll back to card top or just leave as is
-                } else {
-                    // Expand
-                    const hiddenItems = Array.from(items).filter(item => item.classList.contains('hidden'));
-                    const toShow = hiddenItems.slice(0, SHOW_MORE_STEP);
-                    
-                    toShow.forEach(item => item.classList.remove('hidden'));
-
-                    // Check if we reached the end
-                    const remainingHidden = Array.from(items).filter(item => item.classList.contains('hidden'));
-                    if (remainingHidden.length === 0) {
-                        btn.textContent = "Show Less";
-                    }
-                }
+            items.forEach((item, index) => {
+              if (index >= INITIAL_VISIBLE) {
+                item.classList.add('hidden');
+              }
             });
+          }
 
-            // Initialize this card
-            init();
+          btn.addEventListener('click', function() {
+            if (btn.textContent === "Show Less") {
+              items.forEach((item, index) => {
+                if (index >= INITIAL_VISIBLE) {
+                  item.classList.add('hidden');
+                }
+              });
+              btn.textContent = "Load More";
+            } else {
+              const hiddenItems = Array.from(items).filter(item => item.classList.contains('hidden'));
+              const toShow = hiddenItems.slice(0, SHOW_MORE_STEP);
+              
+              toShow.forEach(item => item.classList.remove('hidden'));
+
+              const remainingHidden = Array.from(items).filter(item => item.classList.contains('hidden'));
+              if (remainingHidden.length === 0) {
+                btn.textContent = "Show Less";
+              }
+            }
+          });
+
+          init();
         });
-    });
-</script>
-
-</body>
+      });
+    </script>
+  </body>
 </html>

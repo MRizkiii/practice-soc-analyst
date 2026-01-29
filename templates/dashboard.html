@@ -164,13 +164,14 @@
               </tr>
             </thead>
             <tbody>
+              {% set max_val = jamsort[0][1] if jamsort else 1 %}
               {% for jam, total in jamsort %}
               <tr class="data-item">
                 <td>{{ jam }}:00</td>
                 <td>{{ total }}</td>
                 <td>
                   <div class="bar-container">
-                    <div class="bar" style="width: {{ [total / (jamsort[0][1] if jamsort else 1) * 100, 100] | min }}%"></div>
+                    <div class="bar" style="width: {{ (total / max_val * 100) | round(2) }}%"></div>
                   </div>
                 </td>
               </tr>
